@@ -1,0 +1,3 @@
+venv-work*
+.idea
+__pycache__
