@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Works</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="{% static 'css/style.min.css' %}">
+    <link rel="stylesheet" href="{% static "css/style.min.css" %}">
 </head>
 <body>
     <div class="alert"></div>
@@ -14,11 +14,29 @@
     </div>
     <div class="navigate">
         <div class="navigate__username"></div>
+        <div class="navigate__search">
+            <input type="text">
+        </div>
         <div class="navigate__login">
-            <img src="{% static 'icons/user-svgrepo-com.svg' %}" alt="auth">
+            <img src="{% static "icons/user-svgrepo-com.svg" %}" alt="auth">
         </div>
     </div>
     <div class="content">
+        <div class="filter">
+            <form action="" method="get" class="filter__date">
+                <label>Дата до <input type="date" name="date__lte" class="filter__date-after"></label>
+                <label>Дата после <input type="date" name="date__gte" class="filter__date-before"></label>
+                <button type="submit">Найти</button>
+            </form>
+            <div class="filter__dissmised">
+                <fieldset>
+                    <legend>Уволен?</legend>
+                    <label>Да<input type="radio" name="is_dismissed" value="true"/></label>
+                    <label>Нет<input type="radio" name="is_dismissed" value="false" /></label>
+                    <label>-----<input type="radio" name="is_dismissed" value="" checked/></label>
+                  </fieldset>                  
+            </div>
+        </div>
         <div class="container">
             <table>
                 <tr>
@@ -32,6 +50,6 @@
             </table>
         </div>
     </div>
-    <script src="{% static 'js/scripts.js' %}"></script>
+    <script src="{% static "js/scripts.js" %}"></script>
 </body>
 </html>

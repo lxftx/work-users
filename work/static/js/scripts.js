@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body.style.overflow = "hidden";
         const textHtmlForm = `
         <div class="modal__wrapper">
-            <img class="modal__close" src="static/icons/cross-svgrepo-com.svg" alt="close">
+            <img class="modal__close" src="/static/icons/cross-svgrepo-com.svg" alt="close">
             <div class="modal__title">Пользователь<br/>${user.full_name}</div>
             <div class="modal__inputs">
                 <form id="updateForm">
@@ -223,19 +223,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    async function getUsers() {
+    async function getFullUser() {
+        const data = await fetch(domain + 'api/v1/user');
+        if (!data.ok) throw openAlert(data("Ошибка сервера!"))
+        getUsers(await data.json());
+    }
+    getFullUser();
+
+    async function getUsers(data) {
         let html = '';
-        const response = await fetch(domain + 'api/v1/user/', {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-
-        if (!response.ok) return
-
-        const data = await response.json();
-
         data.forEach(item => {
             html += `
             <tr>
@@ -256,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         table.innerHTML += html;
         addEventBtn();
     }
-    getUsers();
 
 
     function clearTable() {
@@ -267,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function addEventBtn() {
         const btnEdit = body.querySelectorAll('.btn-edit'),
             btnDel = body.querySelectorAll('.btn-del');
-        console.log(btnDel);
         btnEdit.forEach(item => {
             item.addEventListener("click", () => {createEditingModal(item)});
         });
@@ -328,10 +322,65 @@ document.addEventListener('DOMContentLoaded', () => {
     function openAlert(text) {
         if (window.getComputedStyle(alert).display == 'block') return
         alert.style.display = "block";
+        alert.style.backgroundColor = "red";
         alert.innerHTML = text;
         setTimeout(() => {
             alert.style.display = "none";
             alert.innerHTML = "";
         }, 3000);
     }
+
+    // Запросы к фильтрам
+
+    async function getUsersForEmailFilter(txt) {
+        const data = await fetch(domain + '/api/v1/user/?email__icontains=' + txt)
+        clearTable();
+        getUsers(await data.json());
+    }
+
+    async function getUsersForFullNameFilter(txt) {
+        const data = await fetch(domain + '/api/v1/user/?full_name__icontains=' + txt)
+        clearTable();
+        getUsers(await data.json());
+    }
+
+    async function getUsersForDateDissmisedFilter(obj) {
+        const data = await fetch(domain + `/api/v1/user/?date_dismissed__gte=${obj.date__lte}&date_dismissed__lte=${obj.date__gte}`)
+        clearTable();
+        getUsers(await data.json());
+    }
+
+    async function getUsersForIsDissmisedFilter(txt) {
+        const data = await fetch(domain + `/api/v1/user/?is_dismissed__icontains=${txt}`)
+        clearTable();
+        getUsers(await data.json());
+    }
+
+    // Фильтры
+    const navigateSearch = body.querySelector('.navigate__search input');
+
+    navigateSearch.addEventListener('input', (e) => {
+        if (e.target.value.search(/[a-zA-Z]+/) != -1) {
+            getUsersForEmailFilter(e.target.value);
+        } else {
+            getUsersForFullNameFilter(e.target.value);
+        };
+    });
+
+    const dateDissmisedFilter = body.querySelector('.filter .filter__date');
+
+    dateDissmisedFilter.addEventListener('submit', (e) => {
+        e.preventDefault()
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        getUsersForDateDissmisedFilter(data);
+    })
+
+    const chkBoxsDissmised = body.querySelectorAll('.filter__dissmised input');
+
+    chkBoxsDissmised.forEach(chkBoxDissmised => {
+        chkBoxDissmised.addEventListener("click", (e) => {
+            getUsersForIsDissmisedFilter(e.target.value);
+        })
+    });
 })
